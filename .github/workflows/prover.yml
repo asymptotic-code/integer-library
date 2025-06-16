@@ -1,0 +1,39 @@
+name: Sui-Prover Test Action
+
+on: [pull_request]
+
+jobs:
+  build-and-run:
+    runs-on: macos-latest
+    env: 
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
+    concurrency:
+      group: ${{ github.head_ref || github.ref_name }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Homebrew
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /usr/local/Homebrew
+            /opt/homebrew
+          key: brew-macos-dotnet8-z3-rust
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install dependencies from formula & build prover & run prover
+        run: |
+          sh run-prover.sh
