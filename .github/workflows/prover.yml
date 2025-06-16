@@ -25,15 +25,14 @@ jobs:
             /opt/homebrew
           key: brew-macos-dotnet8-z3-rust
 
-      - name: Cache Cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Install prover by formula
+        run: brew install asymptotic-code/sui-prover/sui-prover
 
-      - name: Install dependencies from formula & build prover & run prover
+      - name: Run Tests
         run: |
-          sh run-prover.sh
+          cd specs
+          sui-prover -s 2
+          cd ..
+          cd specs-bv
+          sui-prover -s 2 --no-bv-int-encoding
+          echo "All tests passed!"
