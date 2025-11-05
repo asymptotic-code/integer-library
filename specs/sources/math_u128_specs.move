@@ -166,7 +166,7 @@ public fun hi_spec(n: u128): u64 {
  ✅ Extracts the low 64 bits of a u128 value.
  ⏮️ The function does not abort.
 */
-#[spec(prove, target = lo, boogie_opt=b"proverOpt:O:smt.QI.LAZY_THRESHOLD=100 proverOpt:O:smt.QI.EAGER_THRESHOLD=100")]
+#[spec(prove, target = lo, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=100")]
 public fun lo_spec(n: u128): u64 {
     let n_int = n.to_int();
     let result = lo(n);
@@ -205,7 +205,7 @@ public fun lo_u128_spec(n: u128): u128 {
  ✅ Constructs a u128 from low and high u64 components.
  ⏮️ The function does not abort.
 */
-#[spec(prove, target = from_lo_hi, boogie_opt=b"proverOpt:O:smt.QI.LAZY_THRESHOLD=100 proverOpt:O:smt.QI.EAGER_THRESHOLD=100")]
+#[spec(prove, target = from_lo_hi, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=100")]
 public fun from_lo_hi_spec(lo: u64, hi: u64): u128 {
     let result = from_lo_hi(lo, hi);
     let expected_result = hi.to_int().mul(1u64.to_int().shl(64u64.to_int())).add(lo.to_int());
