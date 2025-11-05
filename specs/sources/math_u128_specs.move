@@ -166,7 +166,7 @@ public fun hi_spec(n: u128): u64 {
  ✅ Extracts the low 64 bits of a u128 value.
  ⏮️ The function does not abort.
 */
-#[spec(prove, target = lo)]
+#[spec(prove, target = lo, boogie_opt=b"proverOpt:O:smt.QI.LAZY_THRESHOLD=100 proverOpt:O:smt.QI.EAGER_THRESHOLD=100")]
 public fun lo_spec(n: u128): u64 {
     let n_int = n.to_int();
     let result = lo(n);
