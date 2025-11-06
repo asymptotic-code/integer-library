@@ -287,7 +287,7 @@ public fun shr_spec(v: I64, shift: u8): I64 {
  ✅ Computes `v % n`.
  ⏮️ The function aborts when the denominator is zero.
 */
-#[spec(prove, target = mod)]
+#[spec(prove, target = mod, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=100")]
 public fun mod_spec(v: I64, n: I64): I64 {
     let v_int = v.to_int();
     let n_int = n.to_int();
