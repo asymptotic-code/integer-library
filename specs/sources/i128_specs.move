@@ -295,7 +295,7 @@ public fun abs_u128_spec(v: I128): u128 {
  ✅ Computes `v << shift`.
  ⏮️ The function aborts unless `shift < 128`.
 */
-#[spec(prove, target = shl, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=25")]
+#[spec(prove, target = shl, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=50")]
 public fun shl_spec(v: I128, shift: u8): I128 {
     asserts(shift < 128);
     let result = shl(v, shift);
