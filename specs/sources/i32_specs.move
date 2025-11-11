@@ -209,7 +209,7 @@ public fun sub_spec(num1: I32, num2: I32): I32 {
  ✅ Computes `num1 * num2`.
  ⏮️ The function aborts when the result does not fit in `I32`.
 */
-#[spec(prove, target = mul, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=50")]
+#[spec(prove, target = mul, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=100")]
 public fun mul_spec(num1: I32, num2: I32): I32 {
     let num1_int = num1.to_int();
     let num2_int = num2.to_int();
