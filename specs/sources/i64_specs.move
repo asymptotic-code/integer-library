@@ -208,7 +208,7 @@ public fun sub_spec(num1: I64, num2: I64): I64 {
  ✅ Computes `num1 * num2`.
  ⏮️ The function aborts when the result does not fit in `I64`.
 */
-#[spec(prove, target = mul)]
+#[spec(prove, target = mul, boogie_opt=b"vcsMaxKeepGoingSplits:4 vcsSplitOnEveryAssert vcsFinalAssertTimeout:300")]
 public fun mul_spec(num1: I64, num2: I64): I64 {
     let num1_int = num1.to_int();
     let num2_int = num2.to_int();
@@ -262,7 +262,7 @@ public fun abs_u64_spec(v: I64): u64 {
  ✅ Computes `v << shift`.
  ⏮️ The function aborts unless `shift < 64`.
 */
-#[spec(prove, target = shl)]
+#[spec(prove, target = shl, boogie_opt=b"vcsMaxKeepGoingSplits:4 vcsSplitOnEveryAssert vcsFinalAssertTimeout:600")]
 public fun shl_spec(v: I64, shift: u8): I64 {
     asserts(shift < 64);
     let result = shl(v, shift);
