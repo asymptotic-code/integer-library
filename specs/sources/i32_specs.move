@@ -263,7 +263,7 @@ public fun abs_u32_spec(v: I32): u32 {
  ✅ Computes `v << shift`.
  ⏮️ The function aborts unless `shift < 32`.
 */
-#[spec(prove, target = shl, boogie_opt=b"vcsMaxKeepGoingSplits:4 vcsSplitOnEveryAssert vcsFinalAssertTimeout:300")]
+#[spec(prove, target = shl, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=100 vcsMaxKeepGoingSplits:4 vcsSplitOnEveryAssert vcsFinalAssertTimeout:300")]
 public fun shl_spec(v: I32, shift: u8): I32 {
     asserts(shift < 32);
     let result = shl(v, shift);
