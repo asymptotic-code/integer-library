@@ -74,7 +74,7 @@ public fun mul_div_ceil_spec(num1: u64, num2: u64, denom: u64): u64 {
     asserts(denom > 0);
     let product_int = num1.to_int().mul(num2.to_int());
     let denom_int = denom.to_int();
-    let expected_result_int = product_int.add(denom_int.sub(1u64.to_int())).div(denom_int);
+    let expected_result_int = product_int.div_round_up(denom_int);
     asserts(expected_result_int.lte(std::u64::max_value!().to_int()));
 
     let result = mul_div_ceil(num1, num2, denom);

@@ -86,11 +86,9 @@ public fun div_round_spec(num: u256, denom: u256, round_up: bool): u256 {
     let res_int = res.to_int();
 
     if (!round_up) {
-        ensures(res_int.mul(denom_int).lte(num_int));
-        ensures(num_int.lt(res_int.add(1u64.to_int()).mul(denom_int)));
+        ensures(res_int == num_int.div(denom_int));
     } else {
-        ensures(res_int.sub(1u64.to_int()).mul(denom_int).lt(num_int));
-        ensures(num_int.lte(res_int.mul(denom_int)));
+        ensures(res_int == num_int.div_round_up(denom_int));
     };
     res
 }

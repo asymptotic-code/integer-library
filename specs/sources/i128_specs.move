@@ -43,64 +43,13 @@ use std::integer::Integer;
 #[spec_only]
 use prover::prover::{ensures, asserts};
 
-const MIN_AS_U128: u128 = 0x80000000000000000000000000000000;
-const MAX_AS_U128: u128 = 0x7fffffffffffffffffffffffffffffff;
-
-#[spec_only]
-fun to_signed_int(x: u128): Integer {
-    if (x <= MAX_AS_U128) {
-        x.to_int()
-    } else {
-        let pow_2_128 = 0x100000000000000000000000000000000u256.to_int();
-        x.to_int().sub(pow_2_128)
-    }
-}
-
 #[spec_only]
 fun to_int(v: I128): Integer {
     v.as_u128().to_signed_int()
 }
 
 #[spec_only]
-fun is_i128(v: Integer): bool {
-    v.gte(MIN_AS_U128.to_signed_int()) && v.lte(MAX_AS_U128.to_signed_int())
-}
-
-#[spec_only]
-public fun int_div_trunc(x: Integer, y: Integer): Integer {
-    let result_abs = x.abs().div(y.abs());
-    if (x.is_pos() && y.is_pos() || x.is_neg() && y.is_neg()) {
-        result_abs
-    } else {
-        result_abs.neg()
-    }
-}
-
-#[spec_only]
-public fun int_abs(v: Integer): Integer {
-    if (v.is_neg()) {
-        v.neg()
-    } else {
-        v
-    }
-}
-
-#[spec_only]
-public fun int_is_pos(v: Integer): bool {
-    v.gte(0u128.to_int())
-}
-
-#[spec_only]
-public fun int_is_neg(v: Integer): bool {
-    v.lt(0u128.to_int())
-}
-
 use fun to_int as I128.to_int;
-use fun to_signed_int as u128.to_signed_int;
-use fun int_abs as Integer.abs;
-use fun int_is_pos as Integer.is_pos;
-use fun int_is_neg as Integer.is_neg;
-use fun int_div_trunc as Integer.div_trunc;
 
 /*
  ✅ Computes `0` as an `I128`.
@@ -119,7 +68,7 @@ public fun zero_spec(): I128 {
 */
 #[spec(prove, target = from)]
 public fun from_spec(v: u128): I128 {
-    asserts(is_i128(v.to_int()));
+    asserts(v.to_int().is_i128());
     let result = from(v);
     ensures(result.to_int() == v.to_int());
     result
@@ -131,7 +80,7 @@ public fun from_spec(v: u128): I128 {
 */
 #[spec(prove, target = neg_from)]
 public fun neg_from_spec(v: u128): I128 {
-    asserts(is_i128(v.to_int().neg()));
+    asserts(v.to_int().neg().is_i128());
     let result = neg_from(v);
     ensures(result.to_int() == v.to_int().neg());
     result
@@ -144,7 +93,7 @@ public fun neg_from_spec(v: u128): I128 {
 #[spec(prove, target = neg)]
 public fun neg_spec(v: I128): I128 {
     let v_int = v.to_int();
-    asserts(is_i128(v_int.neg()));
+    asserts(v_int.neg().is_i128());
     let result = neg(v);
     ensures(result.to_int() == v_int.neg());
     result
@@ -174,7 +123,7 @@ public fun add_spec(num1: I128, num2: I128): I128 {
     let num1_int = num1.to_int();
     let num2_int = num2.to_int();
     let sum_int = num1_int.add(num2_int);
-    asserts(is_i128(sum_int));
+    asserts(sum_int.is_i128());
     let result = add(num1, num2);
     ensures(result.to_int() == sum_int);
     result
@@ -191,7 +140,7 @@ public fun overflowing_add_spec(num1: I128, num2: I128): (I128, bool) {
     let sum_int = num1_int.add(num2_int);
     let (result, overflow) = overflowing_add(num1, num2);
     ensures(result.to_int() == sum_int.to_u128().to_signed_int());
-    ensures(overflow == !is_i128(sum_int));
+    ensures(overflow == !sum_int.is_i128());
     (result, overflow)
 }
 
@@ -216,7 +165,7 @@ public fun wrapping_sub_spec(num1: I128, num2: I128): I128 {
 #[spec(prove, target = sub)]
 public fun sub_spec(num1: I128, num2: I128): I128 {
     let diff_int = num1.to_int().sub(num2.to_int());
-    asserts(is_i128(diff_int));
+    asserts(diff_int.is_i128());
     let result = sub(num1, num2);
     ensures(result.to_int() == diff_int);
     result
@@ -233,7 +182,7 @@ public fun overflowing_sub_spec(num1: I128, num2: I128): (I128, bool) {
     let diff_int = num1_int.sub(num2_int);
     let (result, overflow) = overflowing_sub(num1, num2);
     ensures(result.to_int() == diff_int.to_u128().to_signed_int());
-    ensures(overflow == !is_i128(diff_int));
+    ensures(overflow == !diff_int.is_i128());
     (result, overflow)
 }
 
@@ -246,7 +195,7 @@ public fun mul_spec(num1: I128, num2: I128): I128 {
     let num1_int = num1.to_int();
     let num2_int = num2.to_int();
     let product_int = num1_int.mul(num2_int);
-    asserts(is_i128(product_int));
+    asserts(product_int.is_i128());
     let result = mul(num1, num2);
     ensures(result.to_int() == product_int);
     result
@@ -262,7 +211,7 @@ public fun div_spec(num1: I128, num2: I128): I128 {
     let num2_int = num2.to_int();
     asserts(num2_int != 0u128.to_int());
     let quotient_int = num1_int.div_trunc(num2_int);
-    asserts(is_i128(quotient_int));
+    asserts(quotient_int.is_i128());
     let result = div(num1, num2);
     ensures(result.to_int() == quotient_int);
     result
@@ -274,7 +223,7 @@ public fun div_spec(num1: I128, num2: I128): I128 {
 */
 #[spec(prove, target = abs)]
 public fun abs_spec(v: I128): I128 {
-    asserts(is_i128(v.to_int().abs()));
+    asserts(v.to_int().abs().is_i128());
     let result = abs(v);
     ensures(result.to_int() == v.to_int().abs());
     result
@@ -295,10 +244,11 @@ public fun abs_u128_spec(v: I128): u128 {
  ✅ Computes `v << shift`.
  ⏮️ The function aborts unless `shift < 128`.
 */
+#[spec(prove, target = shl, boogie_opt=b"vcsSplitOnEveryAssert proverOpt:O:smt.QI.EAGER_THRESHOLD=100 vcsFinalAssertTimeout:600")]
 public fun shl_spec(v: I128, shift: u8): I128 {
     asserts(shift < 128);
     let result = shl(v, shift);
-    ensures(result.as_u128() == v.to_int().shl(shift.to_int()).to_u128());
+    ensures(result.to_int() == v.to_int().shl(shift.to_int()).to_u128().to_signed_int());
     result
 }
 
@@ -321,7 +271,7 @@ public fun shr_spec(v: I128, shift: u8): I128 {
 */
 #[spec(prove, target = as_i64)]
 public fun as_i64_spec(v: I128): integer_library::i64::I64 {
-    asserts(i64_specs::is_i64(v.to_int()));
+    asserts(v.to_int().is_i64());
     let result = as_i64(v);
     ensures(i64_specs::to_int(result) == v.to_int());
     result
@@ -333,7 +283,7 @@ public fun as_i64_spec(v: I128): integer_library::i64::I64 {
 */
 #[spec(prove, target = as_i32)]
 public fun as_i32_spec(v: I128): integer_library::i32::I32 {
-    asserts(i32_specs::is_i32(v.to_int()));
+    asserts(v.to_int().is_i32());
     let result = as_i32(v);
     ensures(i32_specs::to_int(result) == v.to_int());
     result

@@ -37,69 +37,13 @@ use std::integer::Integer;
 #[spec_only]
 use prover::prover::{ensures, asserts};
 
-const MIN_AS_U64: u64 = 0x8000000000000000;
-const MAX_AS_U64: u64 = 0x7fffffffffffffff;
-
-#[spec_only]
-fun to_signed_int(x: u64): Integer {
-    if (x <= MAX_AS_U64) {
-        x.to_int()
-    } else {
-        x.to_int().sub(1u8.to_int().shl(64u8.to_int()))
-    }
-}
-
 #[spec_only]
 fun to_int(v: I64): Integer {
     v.as_u64().to_signed_int()
 }
 
 #[spec_only]
-fun is_i64(v: Integer): bool {
-    v.gte(MIN_AS_U64.to_signed_int()) && v.lte(MAX_AS_U64.to_signed_int())
-}
-
-#[spec_only]
-public fun int_div_trunc(x: Integer, y: Integer): Integer {
-    let result_abs = x.abs().div(y.abs());
-    if (x.is_pos() && y.is_pos() || x.is_neg() && y.is_neg()) {
-        result_abs
-    } else {
-        result_abs.neg()
-    }
-}
-
-#[spec_only]
-public fun int_mod_trunc(x: Integer, y: Integer): Integer {
-    x.sub(y.mul(x.div_trunc(y)))
-}
-
-#[spec_only]
-public fun int_abs(v: Integer): Integer {
-    if (v.is_neg()) {
-        v.neg()
-    } else {
-        v
-    }
-}
-
-#[spec_only]
-public fun int_is_pos(v: Integer): bool {
-    v.gte(0u64.to_int())
-}
-
-#[spec_only]
-public fun int_is_neg(v: Integer): bool {
-    v.lt(0u64.to_int())
-}
-
 use fun to_int as I64.to_int;
-use fun to_signed_int as u64.to_signed_int;
-use fun int_abs as Integer.abs;
-use fun int_is_pos as Integer.is_pos;
-use fun int_is_neg as Integer.is_neg;
-use fun int_div_trunc as Integer.div_trunc;
-use fun int_mod_trunc as Integer.mod_trunc;
 
 /*
  ✅ Computes `0` as an `I64`.
@@ -129,7 +73,7 @@ public fun from_u64_spec(v: u64): I64 {
 */
 #[spec(prove, target = from)]
 public fun from_spec(v: u64): I64 {
-    asserts(is_i64(v.to_int()));
+    asserts(v.to_int().is_i64());
     let result = from(v);
     ensures(result.to_int() == v.to_int());
     result
@@ -141,7 +85,7 @@ public fun from_spec(v: u64): I64 {
 */
 #[spec(prove, target = neg_from)]
 public fun neg_from_spec(v: u64): I64 {
-    asserts(is_i64(v.to_int().neg()));
+    asserts(v.to_int().neg().is_i64());
     let result = neg_from(v);
     ensures(result.to_int() == v.to_int().neg());
     result
@@ -171,7 +115,7 @@ public fun add_spec(num1: I64, num2: I64): I64 {
     let num1_int = num1.to_int();
     let num2_int = num2.to_int();
     let sum_int = num1_int.add(num2_int);
-    asserts(is_i64(sum_int));
+    asserts(sum_int.is_i64());
     let result = add(num1, num2);
     ensures(result.to_int() == sum_int);
     result
@@ -198,7 +142,7 @@ public fun wrapping_sub_spec(num1: I64, num2: I64): I64 {
 #[spec(prove, target = sub)]
 public fun sub_spec(num1: I64, num2: I64): I64 {
     let diff_int = num1.to_int().sub(num2.to_int());
-    asserts(is_i64(diff_int));
+    asserts(diff_int.is_i64());
     let result = sub(num1, num2);
     ensures(result.to_int() == diff_int);
     result
@@ -208,12 +152,12 @@ public fun sub_spec(num1: I64, num2: I64): I64 {
  ✅ Computes `num1 * num2`.
  ⏮️ The function aborts when the result does not fit in `I64`.
 */
-#[spec(prove, target = mul, boogie_opt=b"vcsMaxKeepGoingSplits:4 vcsSplitOnEveryAssert vcsFinalAssertTimeout:300")]
+#[spec(prove, target = mul, boogie_opt=b"vcsSplitOnEveryAssert vcsFinalAssertTimeout:300")]
 public fun mul_spec(num1: I64, num2: I64): I64 {
     let num1_int = num1.to_int();
     let num2_int = num2.to_int();
     let product_int = num1_int.mul(num2_int);
-    asserts(is_i64(product_int));
+    asserts(product_int.is_i64());
     let result = mul(num1, num2);
     ensures(result.to_int() == product_int);
     result
@@ -229,7 +173,7 @@ public fun div_spec(num1: I64, num2: I64): I64 {
     let num2_int = num2.to_int();
     asserts(num2_int != 0u64.to_int());
     let quotient_int = num1_int.div_trunc(num2_int);
-    asserts(is_i64(quotient_int));
+    asserts(quotient_int.is_i64());
     let result = div(num1, num2);
     ensures(result.to_int() == quotient_int);
     result
@@ -241,7 +185,7 @@ public fun div_spec(num1: I64, num2: I64): I64 {
 */
 #[spec(prove, target = abs)]
 public fun abs_spec(v: I64): I64 {
-    asserts(is_i64(v.to_int().abs()));
+    asserts(v.to_int().abs().is_i64());
     let result = abs(v);
     ensures(result.to_int() == v.to_int().abs());
     result
@@ -262,11 +206,11 @@ public fun abs_u64_spec(v: I64): u64 {
  ✅ Computes `v << shift`.
  ⏮️ The function aborts unless `shift < 64`.
 */
-#[spec(prove, target = shl, boogie_opt=b"proverOpt:O:smt.QI.EAGER_THRESHOLD=100 vcsMaxKeepGoingSplits:4 vcsSplitOnEveryAssert vcsFinalAssertTimeout:600")]
+#[spec(prove, target = shl, boogie_opt=b"vcsSplitOnEveryAssert proverOpt:O:smt.QI.EAGER_THRESHOLD=100 vcsFinalAssertTimeout:600")]
 public fun shl_spec(v: I64, shift: u8): I64 {
     asserts(shift < 64);
     let result = shl(v, shift);
-    ensures(result.as_u64() == v.to_int().shl(shift.to_int()).to_u64());
+    ensures(result.to_int() == v.to_int().shl(shift.to_int()).to_u64().to_signed_int());
     result
 }
 
