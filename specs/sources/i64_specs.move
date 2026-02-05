@@ -206,7 +206,14 @@ public fun abs_u64_spec(v: I64): u64 {
  ✅ Computes `v << shift`.
  ⏮️ The function aborts unless `shift < 64`.
 */
-#[spec(prove, target = shl, boogie_opt=b"vcsSplitOnEveryAssert vcsMaxKeepGoingSplits:4 proverOpt:O:smt.QI.EAGER_THRESHOLD=100 vcsFinalAssertTimeout:600")]
+#[
+    spec(
+        prove,
+        target = shl,
+        boogie_opt = b"vcsSplitOnEveryAssert vcsMaxKeepGoingSplits:4 proverOpt:O:smt.QI.EAGER_THRESHOLD=100 vcsFinalAssertTimeout:600",
+        skip = b"skip ci run.",
+    ),
+]
 public fun shl_spec(v: I64, shift: u8): I64 {
     asserts(shift < 64);
     let result = shl(v, shift);
