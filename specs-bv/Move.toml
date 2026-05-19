@@ -1,8 +1,0 @@
-# mainnet
-# -------------------------------
-[package]
-name = "IntegerLibrarySpecsBV"
-edition = "2024.beta"
-
-[addresses]
-integer_library_specs_bv = "0x0"
